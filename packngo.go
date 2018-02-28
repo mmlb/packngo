@@ -40,6 +40,17 @@ type ListOptions struct {
 	Includes string
 }
 
+type meta struct {
+	First       Href `json:"first"`
+	Previous    Href `json:"previous"`
+	Self        Href `json:"self"`
+	Next        Href `json:"next"`
+	Last        Href `json:"last"`
+	CurrentPage int  `json:"current_page"`
+	LastPage    int  `json:"last_page"`
+	Total       int  `json:"total"`
+}
+
 // Response is the http response from api calls
 type Response struct {
 	*http.Response
