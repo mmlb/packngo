@@ -7,6 +7,7 @@ const projectBasePath = "/projects"
 // ProjectService interface defines available project methods
 type ProjectService interface {
 	List() ([]Project, *Response, error)
+	ListAll() ([]Project, *Response, error)
 	Get(string) (*Project, *Response, error)
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
@@ -20,6 +21,7 @@ type volumesRoot struct {
 
 type projectsRoot struct {
 	Projects []Project `json:"projects"`
+	Meta     meta      `json:"meta"`
 }
 
 // Project represents a Packet project
@@ -73,8 +75,30 @@ func (s *ProjectServiceOp) List() ([]Project, *Response, error) {
 	if err != nil {
 		return nil, resp, err
 	}
-
 	return root.Projects, resp, err
+}
+
+// ListAll returns the all of the user's projects
+func (s *ProjectServiceOp) ListAll() ([]Project, *Response, error) {
+	var projects []Project
+	var resp *Response
+
+	root := new(projectsRoot)
+	page := 1
+	last := 2
+	urlFormat := projectBasePath + "?page=%d"
+	for ; page <= last; page++ {
+		var err error
+
+		resp, err = s.client.DoRequest("GET", fmt.Sprintf(urlFormat, page), nil, root)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		projects = append(projects, root.Projects...)
+		last = root.Meta.LastPage
+	}
+	return projects, resp, nil
 }
 
 // Get returns a project by id
